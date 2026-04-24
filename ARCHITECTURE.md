@@ -68,3 +68,9 @@ Config keys:
 - `GROQ_MODEL`
 - `GROQ_TIMEOUT_SECONDS`
 - `GROQ_ENDPOINT`
+
+## If I Had More Time
+
+- I would make reliability more visible day to day by adding stronger monitoring, clearer logs, and alerts so failures are noticed early instead of discovered late.
+- I would improve overall user experience by polishing workflows (especially filtering and issue handling), and expanding test coverage to protect against regressions.
+- I would harden the system for production by doing deeper performance tuning, running load tests, and documenting a more complete operations/deployment playbook.
