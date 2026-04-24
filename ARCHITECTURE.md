@@ -16,13 +16,16 @@ Reason: fastest to build and maintain for a small-to-mid product scope, with few
 2. Asynchronous summary generation
 Reason: issue creation/update should stay fast for users; summary generation runs in background via queue.
 
-3. Groq-first with rules fallback
+3. Groq as the primary AI provider
+Reason: practical API integration, strong ticket-summary output quality, and good fit for rapid assessment delivery.
+
+4. Groq-first with rules fallback
 Reason: use AI quality when available, but guarantee continuity when API/key/network fails.
 
-4. Escalation checks in two paths
+5. Escalation checks in two paths
 Reason: immediate checks on create/update catch urgent items quickly; scheduled checks catch time-based escalation conditions.
 
-5. Summary attempt history is stored
+6. Summary attempt history is stored
 Reason: provides transparency, troubleshooting, and auditability of source (`groq` vs `rules`) and failures.
 
 ## Trade-offs (Simple)
