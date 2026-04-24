@@ -135,7 +135,7 @@ php artisan test
 
 ## Design Notes
 
-For architecture choices and trade-offs, see `ARCHITECTURE.md`.
+For architecture choices and trade-offs, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Troubleshooting
 
