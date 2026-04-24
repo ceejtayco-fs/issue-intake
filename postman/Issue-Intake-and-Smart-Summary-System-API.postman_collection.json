@@ -1,0 +1,342 @@
+﻿{
+  "info": {
+    "name": "Issue Intake and Smart Summary System API",
+    "description": "Postman collection for available Laravel API endpoints under /api/issues.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "7ef98bbc-99f5-49ff-9fca-aec16baa2af8"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost"
+    },
+    {
+      "key": "issue_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "List Issues",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues?per_page=15&status=open&category=technical&priority=high&is_escalated=false&q=login&trashed=with",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "15"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "category",
+                  "value": "technical"
+                },
+                {
+                  "key": "priority",
+                  "value": "high"
+                },
+                {
+                  "key": "is_escalated",
+                  "value": "false"
+                },
+                {
+                  "key": "q",
+                  "value": "login"
+                },
+                {
+                  "key": "trashed",
+                  "value": "with",
+                  "description": "Allowed: with | only"
+                }
+              ]
+            },
+            "description": "GET /api/issues\n\nQuery params:\n- per_page (1-100)\n- status: open | in_progress | resolved | closed\n- category: billing | account | technical | access | general_inquiry | feedback | other\n- priority: low | medium | high | critical\n- is_escalated: true | false\n- q: title/description search\n- trashed: with | only"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.data && json.data.length > 0 && json.data[0].id) {",
+                  "  pm.collectionVariables.set('issue_id', String(json.data[0].id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unable to access dashboard\",\n  \"description\": \"User receives a 403 error when trying to access the dashboard after logging in from VPN.\",\n  \"priority\": \"high\",\n  \"category\": \"access\",\n  \"status\": \"open\",\n  \"due_at\": \"2026-12-31T08:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues"
+              ]
+            },
+            "description": "POST /api/issues\n\nRequired fields: title, description, priority, category\nOptional: status, due_at"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "if (json && json.data && json.data.id) {",
+                  "  pm.collectionVariables.set('issue_id', String(json.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Issue By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues",
+                "{{issue_id}}"
+              ]
+            },
+            "description": "GET /api/issues/{id}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Issue (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\",\n  \"priority\": \"critical\",\n  \"description\": \"Issue reproduced and currently under investigation by support engineering.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues",
+                "{{issue_id}}"
+              ]
+            },
+            "description": "PATCH /api/issues/{id} (PUT is also supported)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Issue",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues",
+                "{{issue_id}}"
+              ]
+            },
+            "description": "DELETE /api/issues/{id} (soft delete)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 204', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Restore Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}/restore",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues",
+                "{{issue_id}}",
+                "restore"
+              ]
+            },
+            "description": "POST /api/issues/{id}/restore (only for soft-deleted issues)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Regenerate Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}/regenerate-summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "issues",
+                "{{issue_id}}",
+                "regenerate-summary"
+              ]
+            },
+            "description": "POST /api/issues/{id}/regenerate-summary"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+

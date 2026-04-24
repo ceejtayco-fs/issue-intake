@@ -76,6 +76,15 @@
                         {{ $issue->summary_status->value }}
                     </span>
                 </div>
+                @php($latestSummaryAttempt = $issue->summaries->first())
+                @if ($latestSummaryAttempt)
+                    <p class="text-xs text-slate-500 mb-3">
+                        Source: <span class="font-medium text-slate-700">{{ $latestSummaryAttempt->driver }}</span>
+                        @if ($latestSummaryAttempt->model)
+                            <span class="text-slate-400">·</span> {{ $latestSummaryAttempt->model }}
+                        @endif
+                    </p>
+                @endif
                 @if ($issue->summary_status->value === 'ready')
                     <p class="text-sm mb-3"><span class="font-medium">Summary:</span> {{ $issue->summary }}</p>
                     <p class="text-sm"><span class="font-medium">Suggested next action:</span> {{ $issue->next_action }}</p>
@@ -86,30 +95,32 @@
                 @endif
             </section>
 
-            <section class="bg-white border border-slate-200 rounded-lg p-5">
-                <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Update status</h2>
-                <form method="POST" action="{{ route('issues.update', $issue->id) }}" class="flex items-end gap-3">
-                    @csrf
-                    @method('PATCH')
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Status</label>
-                        <select name="status" class="rounded-md border-slate-300 text-sm px-3 py-1.5">
-                            @foreach ($statuses as $s)
-                                <option value="{{ $s->value }}" @selected($s === $issue->status)>{{ $s->value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-1">Priority</label>
-                        <select name="priority" class="rounded-md border-slate-300 text-sm px-3 py-1.5">
-                            @foreach ($priorities as $p)
-                                <option value="{{ $p->value }}" @selected($p === $issue->priority)>{{ $p->value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-500">Save</button>
-                </form>
-            </section>
+            @unless ($issue->trashed())
+                <section class="bg-white border border-slate-200 rounded-lg p-5">
+                    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Update status</h2>
+                    <form method="POST" action="{{ route('issues.update', $issue->id) }}" class="flex items-end gap-3">
+                        @csrf
+                        @method('PATCH')
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Status</label>
+                            <select name="status" class="rounded-md border-slate-300 text-sm px-3 py-1.5">
+                                @foreach ($statuses as $s)
+                                    <option value="{{ $s->value }}" @selected($s === $issue->status)>{{ $s->value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Priority</label>
+                            <select name="priority" class="rounded-md border-slate-300 text-sm px-3 py-1.5">
+                                @foreach ($priorities as $p)
+                                    <option value="{{ $p->value }}" @selected($p === $issue->priority)>{{ $p->value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-500">Save</button>
+                    </form>
+                </section>
+            @endunless
         </div>
 
         <aside class="space-y-6">

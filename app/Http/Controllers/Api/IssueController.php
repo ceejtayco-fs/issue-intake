@@ -24,6 +24,7 @@ class IssueController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $trashedMode = $request->query('trashed');
+
         $perPage = min((int) $request->query('per_page', 15), 100);
         if ($perPage < 1) {
             $perPage = 15;

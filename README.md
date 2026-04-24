@@ -1,59 +1,143 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+﻿# Issue Intake and Smart Summary System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Issue Intake and Smart Summary System is a Laravel 12 application for receiving support issues, tracking their status, and generating suggested summaries and next steps.
 
-## About Laravel
+## What This System Does
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Lets teams submit and manage support issues
+- Shows issue status, priority, category, and escalation flags
+- Generates a summary and suggested next action for each issue
+- Keeps a history of summary attempts (AI and fallback rules)
+- Supports both a web UI and JSON API
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Laravel 12
+- MySQL (default in `.env.example`)
+- Queue driver: `database`
+- Vite + Tailwind CSS 4
 
-## Learning Laravel
+## Prerequisites
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Install these before setup:
+- PHP 8.2+
+- Composer
+- Node.js 22.12+
+- npm
+- MySQL 8+ (or compatible)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Quick Setup
 
-## Laravel Sponsors
+```bash
+composer run setup
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+This command installs dependencies, creates `.env`, generates app key, runs migrations, and builds frontend assets.
 
-### Premium Partners
+## Configure Environment
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Open `.env` and confirm DB + app URL values.
 
-## Contributing
+Example:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```env
+APP_URL=http://issue-intake.test
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=issue_intake
+DB_USERNAME=root
+DB_PASSWORD=
+QUEUE_CONNECTION=database
+```
 
-## Code of Conduct
+## Running the App
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Option A: Laragon (recommended if you use Laragon)
 
-## Security Vulnerabilities
+- Start Laragon services (web server + MySQL)
+- Open your virtual host URL (example: `http://issue-intake.test`)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Run these background commands in separate terminals:
 
-## License
+```bash
+php artisan queue:work
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+For frontend changes:
+
+```bash
+npm run build
+```
+
+## Summarization Configuration
+
+The app supports two summarization drivers:
+- `groq` (primary when configured)
+- `rules` (fallback)
+
+Set in `.env`:
+
+```env
+SUMMARIZER_DRIVER=groq
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.1-8b-instant
+GROQ_TIMEOUT_SECONDS=5
+```
+
+Notes:
+- If `GROQ_API_KEY` is missing/invalid, app falls back to rules summarization.
+- Summary runs asynchronously, so queue worker must be running.
+
+## How to Verify Groq Is Being Used
+
+1. Create an issue or click **Regenerate summary** on an existing issue.
+2. Open the issue detail page.
+3. Check **Source** in the summary panel:
+- `groq · <model>` means AI output
+- `rules · rules-v1` means fallback rules output
+
+## API Endpoints
+
+All API routes are under `/api/issues`:
+- `GET /api/issues`
+- `POST /api/issues`
+- `GET /api/issues/{id}`
+- `PATCH /api/issues/{id}` (also supports `PUT`)
+- `DELETE /api/issues/{id}`
+- `POST /api/issues/{id}/restore`
+- `POST /api/issues/{id}/regenerate-summary`
+
+## Postman Collection
+
+Import:
+
+- `postman/Issue-Intake-and-Smart-Summary-System-API.postman_collection.json`
+
+Set collection variable `base_url` to your running host (for example `http://issue-intake.test` or `http://localhost:8000`).
+
+## Running Tests
+
+```bash
+php artisan test
+```
+
+## Project Structure (Quick View)
+
+- `app/Http/Controllers/Web` - web endpoints and views
+- `app/Http/Controllers/Api` - API endpoints
+- `app/Jobs/GenerateIssueSummary.php` - async summary generation
+- `app/Services/Summarization` - Groq + rules summarizers
+- `app/Services/Escalation` - escalation evaluator
+- `database/migrations` - schema
+- `resources/views/issues` - Blade templates
+
+## Troubleshooting
+
+1. Summary stays `pending`:
+Run queue worker and ensure `QUEUE_CONNECTION=database` with migrated jobs table (`php artisan migrate`).
+2. Groq never appears as source:
+Confirm `SUMMARIZER_DRIVER=groq`, set `GROQ_API_KEY`, then run `php artisan config:clear`.
+3. UI changes not appearing:
+Run `npm run dev` during development, or rebuild with `npm run build`.

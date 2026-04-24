@@ -25,6 +25,12 @@ class IssueWebController extends Controller
     public function index(Request $request): View
     {
         $trashedMode = $request->query('trashed');
+        $statusFilter = $request->query('status');
+
+        if (blank($statusFilter)) {
+            $statusFilter = IssueStatus::Open->value;
+        }
+
         $perPage = min((int) $request->query('per_page', 15), 100);
         if ($perPage < 1) {
             $perPage = 15;
@@ -39,7 +45,7 @@ class IssueWebController extends Controller
         }
 
         $query->filter([
-            'status' => $request->query('status'),
+            'status' => $statusFilter,
             'category' => $request->query('category'),
             'priority' => $request->query('priority'),
             'is_escalated' => $request->query('is_escalated'),
@@ -50,7 +56,10 @@ class IssueWebController extends Controller
 
         return view('issues.index', [
             'issues' => $issues,
-            'filters' => $request->only(['status', 'category', 'priority', 'is_escalated', 'q', 'trashed']),
+            'filters' => array_merge(
+                $request->only(['status', 'category', 'priority', 'is_escalated', 'q', 'trashed']),
+                ['status' => $statusFilter],
+            ),
             'priorities' => IssuePriority::cases(),
             'categories' => IssueCategory::cases(),
             'statuses' => IssueStatus::cases(),
@@ -81,7 +90,9 @@ class IssueWebController extends Controller
 
     public function show(int $id): View
     {
-        $issue = Issue::with(['summaries' => fn ($q) => $q->latest('id')])->findOrFail($id);
+        $issue = Issue::withTrashed()
+            ->with(['summaries' => fn ($q) => $q->latest('id')])
+            ->findOrFail($id);
 
         return view('issues.show', [
             'issue' => $issue,
