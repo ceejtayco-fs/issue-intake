@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('driver', 32);
             $table->string('model', 64)->nullable();
 
-            $table->string('summary', 500);
-            $table->string('next_action', 500);
+            $table->string('summary', 500)->nullable();
+            $table->string('next_action', 500)->nullable();
 
             $table->enum('status', ['succeeded', 'failed']);
 
