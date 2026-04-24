@@ -133,6 +133,10 @@ php artisan test
 - `database/migrations` - schema
 - `resources/views/issues` - Blade templates
 
+## Design Notes
+
+For architecture choices and trade-offs, see `ARCHITECTURE.md`.
+
 ## Troubleshooting
 
 1. Summary stays `pending`:

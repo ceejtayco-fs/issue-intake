@@ -25,6 +25,23 @@ Reason: immediate checks on create/update catch urgent items quickly; scheduled 
 5. Summary attempt history is stored
 Reason: provides transparency, troubleshooting, and auditability of source (`groq` vs `rules`) and failures.
 
+## Trade-offs (Simple)
+
+- Monolith architecture:
+Faster to build and easier to manage in a short timeline, but less independently scalable than splitting into microservices.
+
+- Async summary generation (queue):
+Keeps issue creation fast for users, but summary results are not instant and depend on a running worker.
+
+- Groq + rules fallback:
+AI can produce better contextual summaries, while rules provide reliability when AI is unavailable. Trade-off is consistency vs flexibility in output quality.
+
+- Database queue driver:
+Easy local setup and fewer infrastructure dependencies, but not ideal for high-throughput production workloads compared to Redis or dedicated queue systems.
+
+- Soft delete instead of hard delete:
+Safer recovery of mistakes (restore support), but requires handling trashed records in filters/views and adds lifecycle complexity.
+
 ## End-to-End Flow
 
 1. User submits or updates an issue.
